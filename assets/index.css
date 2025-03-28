@@ -1,0 +1,53 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    height: 100vh;
+    padding: 5rem;
+    gap: 5rem;
+}
+
+body > div {
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.45);
+    border-radius: 1rem;
+    height: 100%;
+    flex: 1 1 0;
+    position: relative;
+    padding: 1rem;
+}
+
+body > div:nth-child(1) {
+    overflow-y: scroll;
+}
+
+body > div:nth-child(2) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+#view {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+#list > li {
+    cursor: pointer;
+}
+
+#list > li:not(:last-child) {
+    margin-bottom: 0.4rem;
+}
+
+#list > li:hover {
+    color: #2e2ec2;
+}
