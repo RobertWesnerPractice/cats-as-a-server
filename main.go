@@ -4,6 +4,8 @@ import (
 	"embed"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"path/filepath"
+	"strings"
 )
 
 //go:embed cats/*
@@ -17,30 +19,37 @@ func main() {
 	router.StaticFS("/public", http.FS(fAssets))
 
 	{
+		entries, err := fCats.ReadDir("cats")
+		if err != nil {
+			panic(err)
+		}
+
+		// Buffer everything here since it cant change at runtime
+		filenameMap := make(map[string]string, len(entries))
+		list := make([]string, len(entries))
+		for i, entry := range entries {
+			filename := entry.Name()
+			name := strings.TrimSuffix(filename, filepath.Ext(filename))
+			filenameMap[name] = filename
+			list[i] = name
+		}
+
 		api := router.Group("/api")
 
-		// TODO: remove .jpeg, etc. from file
 		api.GET("/list", func(c *gin.Context) {
-			entries, err := fCats.ReadDir("cats")
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, struct {
-					Message string `json:"message"`
-				}{err.Error()})
+			c.JSON(http.StatusOK, list)
+		})
+
+		api.GET("/get/:name", func(c *gin.Context) {
+			filename, ok := filenameMap[c.Param("name")]
+			if !ok {
+				c.Data(http.StatusNotFound, "", nil)
 
 				return
 			}
-			results := make([]string, len(entries))
 
-			for i, entry := range entries {
-				results[i] = entry.Name()
-			}
-
-			c.JSON(http.StatusOK, results)
-		})
-
-		// TODO: find by name without extension
-		api.GET("/get/:file", func(c *gin.Context) {
-			file, err := fCats.ReadFile("cats/" + c.Param("file"))
+			c.Param("file")
+			file, err := fCats.ReadFile("cats/" + filename)
 			if err != nil {
 				c.Data(http.StatusNotFound, gin.MIMEHTML, []byte(err.Error()))
 			}
